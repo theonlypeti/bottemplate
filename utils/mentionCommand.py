@@ -10,7 +10,7 @@ def getCommandId(client, command) -> dict:
     #                 ids.update({"Global": value})
     #         return {command: ids}
 
-    return {command: {client.get_guild(i[0][0]) or "Global": i[0][1] for i in (tuple(comm.command_ids.items()) for comm in (comm for comm in client.get_application_commands() if comm.PROJECT_NAME == command))}}
+    return {command: {client.get_guild(i[0][0]) or "Global": i[0][1] for i in (tuple(comm.command_ids.items()) for comm in (comm for comm in client.get_application_commands() if comm.name == command))}}
 
 
 def mentionCommand(client, command:str, guild: int = None, raw: bool = False) -> str:
