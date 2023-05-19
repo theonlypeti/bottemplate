@@ -2,7 +2,7 @@ import nextcord as discord
 from nextcord.ext import commands
 from utils.paginator import Paginator
 
-TESTSERVER = (957469186798518282,860527626100015154) #Replace with your server id
+TESTSERVER = (957469186798518282,) #Replace with your server id
 #commands in this file will only show up in your server that you specify here
 
 
