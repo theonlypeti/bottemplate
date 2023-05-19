@@ -21,11 +21,14 @@ parser = argparse.ArgumentParser(prog=f"{PROJECT_NAME} V{VERSION}", description=
 parser.add_argument("--minimal", action="store_true", help="Disable most of the extensions.")
 parser.add_argument("--debug", action="store_true", help="Enable debug mode.")
 parser.add_argument("--no_testing", action="store_true", help="Disable testing module.")
+parser.add_argument("--only_testing", action="store_true", help="Add testing module.")
 parser.add_argument("--logfile", action="store_true", help="Turns on logging to a text file.")
+parser.add_argument("--no_linecount", action="store_true", help="Disabless opening each file to read the linecount.")
 
 for cog in os.listdir("./cogs"): #adding command line arguments for removing some parts of the bot
     if cog.endswith("cog.py"):
         parser.add_argument(f"--no_{cog.removesuffix('cog.py')}", action="store_true", help=f"Disable {cog} extension.")
+        parser.add_argument(f"--only_{cog.removesuffix('cog.py')}", action="store_true", help=f"Enable only the {cog} extension.")
 
 args = parser.parse_args() #reads the command line arguments
 
@@ -81,23 +84,31 @@ os.chdir(root)
 with open(__file__, "r") as file: #open this file
     linecount = len(file.readlines())
 
-cogs = [cog for cog in os.listdir("./cogs") if cog.endswith(".py")]
-cogcount = len(cogs)
-if args.minimal:
-    cogs = ["testing.py"]
-else:
-    for cog in reversed(cogs): #i could put this into the comprehension but holy frick what would be ugly
-        if cog.endswith("cog.py"):
-            if args.__getattribute__(f"no_{cog.removesuffix('cog.py')}") or args.minimal:
-                cogs.remove(cog)
-cogs.remove("testing.py") if args.no_testing else None
+files = os.listdir(root+r"/utils")
+for file in files:
+    if file.endswith(".py"):
+        with open(root+r"/utils/"+file, "r", encoding="UTF-8") as f:
+            linecount += len(f.readlines())
+
+allcogs = [cog for cog in os.listdir("./cogs") if cog.endswith("cog.py")] + ["testing.py"]
+cogcount = len(allcogs)
+cogs = []
+
+if not args.minimal:  # if not minimal
+    if not [not cogs.append(cog) for cog in allcogs if args.__getattribute__(f"only_{cog.removesuffix('cog.py').removesuffix('.py')}")]: #load all the cogs that are marked to be included with only_*
+        cogs = allcogs[:]  # if no cogs are marked to be exclusively included, load all of them
+        for cog in reversed(cogs):  # remove the cogs that are marked to be excluded with no_*
+            if args.__getattribute__(f"no_{cog.removesuffix('cog.py').removesuffix('.py')}"):  # if the cog is marked to be excluded
+                cogs.remove(cog)  # remove it from the list of cogs to be loaded
+cogs.remove("testing.py") if args.no_testing else None  # remove testing.py from the list of cogs to be loaded if testing is disabled
 
 for n, file in enumerate(cogs, start=1): #its in two only because i wouldnt know how many cogs to load and so dont know how to format loading bar
-    with open("./cogs/"+file, "r", encoding="UTF-8") as f:
-        linecount += len(f.readlines())
+    if not args.no_linecount:
+        with open("./cogs/"+file, "r", encoding="UTF-8") as f:
+            linecount += len(f.readlines())
     client.load_extension("cogs." + file[:-3], extras={"baselogger": baselogger})
     if not args.debug:
-        sys.stdout.write(f"\rLoading... {(n / len(cogs)) * 100:.2f}% [{(int((n/len(cogs))*10)*'=')+'>':<10}]")
+        sys.stdout.write(f"\rLoading... {(n / len(cogs)) * 100:.02f}% [{(int((n/len(cogs))*10)*'=')+'>':<10}]")
         sys.stdout.flush()
 sys.stdout.write(f"\r{len(cogs)}/{cogcount} cogs loaded.".ljust(50)+"\n")
 sys.stdout.flush()

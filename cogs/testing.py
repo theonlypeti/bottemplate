@@ -1,5 +1,6 @@
 import nextcord as discord
 from nextcord.ext import commands
+from utils.paginator import Paginator
 
 TESTSERVER = (957469186798518282,) #Replace with your server id
 #commands in this file will only show up in your server that you specify here
@@ -45,13 +46,20 @@ class Testing(commands.Cog):
             await interaction.send(f"{interaction.user} says {self.inputtext.value}")
 
     @discord.slash_command(name="testingvw", description="testing", guild_ids=TESTSERVER)
-    async def testing(self, ctx: discord.Interaction):
-        viewObj = self.Testvw(ctx.user)
-        viewObj.msg = await ctx.send(content="Hello", view=viewObj, tts=True)
+    async def testing(self, interaction: discord.Interaction):
+        viewObj = self.Testvw(interaction.user)
+        viewObj.msg = await interaction.send(content="Hello", view=viewObj, tts=True)
 
     @discord.slash_command(name="modaltesting", description="testing", guild_ids=TESTSERVER)
-    async def modaltesting(self, ctx):
-        await ctx.response.send_modal(self.TextInputModal())
+    async def modaltesting(self, interaction: discord.Interaction):
+        await interaction.response.send_modal(self.TextInputModal())
+
+    @discord.slash_command(name="pagitest", description="testing", guild_ids=TESTSERVER)
+    async def mycommand(self, interaction: discord.Interaction):
+        embeds = [discord.Embed(title=f"Page {i + 1}", description=f"Page {i + 1} of 5", color=discord.Color.random())
+                  for i in range(5)]
+        pagi = Paginator(func=lambda pagin: embeds[pagin.page], select=None, inv=embeds, itemsOnPage=1)
+        await pagi.render(interaction, ephemeral=True)
 
 
 def setup(client, baselogger):
