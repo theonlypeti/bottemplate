@@ -81,14 +81,18 @@ async def on_disconnect(): #happens sometimes, ensures on_ready will not display
 
 os.chdir(root)
 
-with open(__file__, "r") as file: #open this file
-    linecount = len(file.readlines())
-
 files = os.listdir(root+r"/utils")
-for file in files:
-    if file.endswith(".py"):
-        with open(root+r"/utils/"+file, "r", encoding="UTF-8") as f:
-            linecount += len(f.readlines())
+if not args.no_linecount: #if you don't want to open each file to read the linecount
+
+    with open(__file__, "r") as file: #open this file
+        linecount = len(file.readlines())
+
+    for file in files:
+        if file.endswith(".py"):
+            with open(root+r"/utils/"+file, "r", encoding="UTF-8") as f:
+                linecount += len(f.readlines())
+else:
+    linecount = "Unknown"
 
 allcogs = [cog for cog in os.listdir("./cogs") if cog.endswith("cog.py")] + ["testing.py"]
 cogcount = len(allcogs)
