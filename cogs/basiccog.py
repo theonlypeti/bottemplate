@@ -2,7 +2,6 @@ import random
 import nextcord as discord
 from nextcord.ext import commands
 
-
 class BasicCommands(commands.Cog): #cog for basic commands
     def __init__(self, client, baselogger):
         global logger
