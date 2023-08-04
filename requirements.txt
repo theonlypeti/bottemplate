@@ -2,15 +2,10 @@ nextcord
 coloredlogs
 beautifulsoup4
 argparse
-dotenv
-praw
+python-dotenv
 asyncpraw
-requests
+requests>2.28.1
 emoji
 pillow
-pyowm
-sympy
 imageio
-colorthief
 aiohttp
-

@@ -5,9 +5,8 @@ from datetime import datetime
 import os
 import argparse
 import time as time_module
-import logging
 from dotenv import load_dotenv
-import coloredlogs
+from utils import mylogger
 
 start = time_module.perf_counter() #measuring how long it takes to boot up the bot
 
@@ -31,33 +30,8 @@ for cog in os.listdir("./cogs"): #adding command line arguments for removing som
         parser.add_argument(f"--only_{cog.removesuffix('cog.py')}", action="store_true", help=f"Enable only the {cog} extension.")
 
 args = parser.parse_args() #reads the command line arguments
-
-baselogger = logging.getLogger("Base")
-
-#formatting the colorlogger
-fmt = "[ %(asctime)s %(filename)s %(lineno)d %(funcName)s %(levelname)s ] %(message)s"
-coloredlogs.DEFAULT_FIELD_STYLES = {'asctime': {'color': 'green'}, 'lineno': {'color': 'magenta'}, 'levelname': {'bold': True, 'color': 'black'}, 'filename': {'color': 'blue'},'funcname': {'color': 'cyan'}}
-coloredlogs.DEFAULT_LEVEL_STYLES = {'critical': {'bold': True, 'color': 'red'}, 'debug': {'bold': True, 'color': 'black'}, 'error': {'color': 'red'}, 'info': {'color': 'green'}, 'notice': {'color': 'magenta'}, 'spam': {'color': 'green', 'faint': True}, 'success': {'bold': True, 'color': 'green'}, 'verbose': {'color': 'blue'}, 'warning': {'color': 'yellow'}}
-
-
-if args.logfile: #if you need a text file
-    FORMAT = "[{asctime}][{filename}][{lineno:4}][{funcName}][{levelname}] {message}"
-    formatter = logging.Formatter(FORMAT, style="{")  #this is for default logger
-    filename = f"./logs/bot_log_{datetime.now().strftime('%m-%d-%H-%M-%S')}.txt"
-    os.makedirs(r"./logs", exist_ok=True)
-    with open(filename, "w") as f:
-        pass
-    fl = logging.FileHandler(filename)
-    fl.setFormatter(formatter)
-    fl.setLevel(logging.DEBUG)
-    #fl.addFilter(lambda rec: rec.levelno <= 10) #if u only wanna filter debugs
-    baselogger.addHandler(fl)
-
-baselogger.setLevel(logging.DEBUG) #base is debug, so the file handler could catch debug msgs too
-if args.debug:
-    coloredlogs.install(level=logging.DEBUG, logger=baselogger, fmt=fmt)
-else:
-    coloredlogs.install(level=logging.INFO, logger=baselogger, fmt=fmt)
+mylogger.init(args) #initializing the logger
+from utils.mylogger import baselogger #mylogger.baselogger too long
 
 root = os.getcwd()  #current working directory
 

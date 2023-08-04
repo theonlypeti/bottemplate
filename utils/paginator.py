@@ -21,19 +21,21 @@ class Paginator(discord.ui.View):
     :param kwargs: See above.
 
     Add a back button manually with View.add_item, appropriate to the situation you are in."""
-    def __init__(self, func: Callable[..., discord.Embed] | None, select: Callable[..., discord.ui.Select] | None, inv, itemsOnPage: int = 25, timeout: int|None = None, kwargs=None):
+    def __init__(self, func: Callable[..., discord.Embed] | None, select: Callable[..., discord.ui.Select] | None, inv: Sequence, itemsOnPage: int = 25, timeout: int|None = None, kwargs=None):
         self.mykwargs = kwargs or set()
         self.page: int = 0
         self.maxpages: int = 0  # to be rewritten on update
         self.func = func
         self.select = select
+        self.select.custom_id = "pagiselect"
         self.itemsOnPage: int = itemsOnPage
+        assert self.itemsOnPage
         self.inv: Sequence = inv
         self.msg: discord.Message | None = None
         super().__init__(timeout=timeout)
         self.update()
-        if self.select:
-            self.add_item(select(pagi=self))
+        # if self.select:
+        #     self.add_item(self.select(pagi=self))
 
     @discord.ui.button(emoji=emoji.emojize(':last_track_button:'), row=1, custom_id=f"leftbutton")
     async def back(self, button, interaction: discord.Interaction):
@@ -67,44 +69,52 @@ class Paginator(discord.ui.View):
         This is called automatically when the buttons are pressed and the paginator is rendered.
         Disables the paginator buttons if there is only one page."""
         self.maxpages = ceil(len(self.inv) / self.itemsOnPage)  # in case the inventory changes
-        self.page = min(self.page, self.maxpages-1)
+        self.page = max(min(self.page, self.maxpages-1), 0)
+
         if len(self.inv) <= self.itemsOnPage:
             for ch in self.children:
                 if ch.custom_id in ("leftbutton", "rightbutton"):
                     ch.disabled = True
+        if self.select:
+            select = list(filter(lambda i: i.custom_id == "pagiselect", self.children))
+            if select:
+                self.remove_item(select[0])
+            self.add_item(self.select(pagi=self))
 
     # Add a back button manually with View.add_item, appropriate to the situation you are in
 
-    async def render(self, interaction: discord.Interaction | discord.TextChannel, ephemeral: bool = False, **kwargs) -> None:
+    def slice_inventory(self):
+        """Slices the inventory into the current page."""
+        return self.inv[self.page*self.itemsOnPage:(self.page+1)*self.itemsOnPage]
+
+    async def render(self, interaction: discord.Interaction | discord.TextChannel, edit: bool = True, **kwargs) -> None:
         """Renders the paginator.
         :param interaction: The interaction that triggered the paginator. Can be an interaction or a channel to send the message to.
-        :param ephemeral: Whether to send the paginator as an ephemeral message."""
+        :param edit: Whether to edit the message that's views called the render. If False, it will send a new message. Can be paired with ephemeral."""
         self.update()
         if self.select:
             for n, child in enumerate(self.children):
                 if child.custom_id == "select":
                     self.children[n] = self.select(self)
                     break
-        if not isinstance(interaction, discord.TextChannel) and interaction.message:  # if it's a message, ergo it is to be edited
+
+        if not isinstance(interaction, discord.TextChannel) and edit:  # if it's a interaction or message and it is to be edited
+            msg: discord.Interaction = interaction # for clarity
             if self.func:
-                await interaction.edit(embed=self.func(self), view=self, **kwargs)
+                self.msg = await msg.edit(embed=self.func(self), view=self, **kwargs)
             else:
-                await interaction.edit(view=self, **kwargs)
-        else:  # if it's an interaction, ergo it is sent for the first time
-            if isinstance(interaction, discord.TextChannel):
-                if self.func:
-                    self.msg = await interaction.send(embed=self.func(self), view=self, **kwargs)
-                else:
-                    self.msg = await interaction.send(view=self, **kwargs)
+                self.msg = await msg.edit(view=self, **kwargs)
+
+        else:  # if it's an interaction or a text channel, ergo it is sent for the first time
+            if self.func:
+                self.msg = await interaction.send(embed=self.func(self), view=self, **kwargs)
             else:
-                if self.func:
-                    self.msg = await interaction.send(embed=self.func(self), view=self, ephemeral=ephemeral, **kwargs)
-                else:
-                    self.msg = await interaction.send(view=self, ephemeral=ephemeral, **kwargs)
+                self.msg = await interaction.send(view=self, **kwargs)
+
 
 # Example usage:
 # @discord.slash_command()
 # async def command(self, interaction: discord.Interaction):
 #     embeds = [discord.Embed(title=f"Page {i+1}", description=f"Page {i+1} of 5", color=discord.Color.random()) for i in range(5)]
-#     pagi = Paginator(func=lambda pagin: embeds[pagin.page], select=None, inv=embeds, itemsOnPage=1)
+#     pagi = Paginator(func=lambda pagin: pagin.inv[pagin.page], select=None, inv=embeds, itemsOnPage=1)
 #     await pagi.render(interaction, ephemeral=True)
