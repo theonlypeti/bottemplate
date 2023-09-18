@@ -3,9 +3,9 @@ from nextcord.ext import commands
 
 
 class Template(commands.Cog):
-    def __init__(self, client, baselogger):
+    def __init__(self, client):
         global logger
-        logger = baselogger.getChild(f"{__name__}Logger")
+        logger = client.logger.getChild(f"{__name__}Logger")
         self.client = client
 
     # add your own commands here
@@ -13,5 +13,5 @@ class Template(commands.Cog):
         ...
 
 
-def setup(client, baselogger):
-    client.add_cog(Template(client, baselogger))
+def setup(client):
+    client.add_cog(Template(client))

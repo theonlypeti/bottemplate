@@ -2,14 +2,14 @@ import nextcord as discord
 from nextcord.ext import commands
 from utils.paginator import Paginator
 
-TESTSERVER = (957469186798518282,) #Replace with your server id
+TESTSERVER = (860527626100015154,) #Replace with your server id
 #commands in this file will only show up in your server that you specify here
 
 
 class Testing(commands.Cog):
-    def __init__(self, client, baselogger):
+    def __init__(self, client):
         global logger
-        logger = baselogger.getChild(f"{__name__}Logger")
+        logger = client.logger.getChild(f"{__name__}Logger")
         self.client = client
         if TESTSERVER[0] == 957469186798518282: #default check, ignore this if you changed it already
             logger.warning("in cogs/testing.py replace the server id to your server's id for the testing commands to show up, then you can delete this line.")
@@ -55,7 +55,7 @@ class Testing(commands.Cog):
         await interaction.response.send_modal(self.TextInputModal())
 
     @discord.slash_command(name="pagitest", description="testing", guild_ids=TESTSERVER)
-    async def mycommand(self, interaction: discord.Interaction):
+    async def pagitest(self, interaction: discord.Interaction):
         embeds = [discord.Embed(title=f"Page {i + 1}", description=f"Page {i + 1} of 5", color=discord.Color.random())
                   for i in range(5)]
         pagi = Paginator(func=lambda pagin: embeds[pagin.page], select=None, inv=embeds, itemsOnPage=1)
@@ -63,5 +63,5 @@ class Testing(commands.Cog):
 
 
 def setup(client, baselogger):
-    client.add_cog(Testing(client, baselogger))
+    client.add_cog(Testing(client))
 

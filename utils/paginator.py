@@ -27,7 +27,8 @@ class Paginator(discord.ui.View):
         self.maxpages: int = 0  # to be rewritten on update
         self.func = func
         self.select = select
-        self.select.custom_id = "pagiselect"
+        if self.select:
+            self.select.custom_id = "pagiselect"
         self.itemsOnPage: int = itemsOnPage
         assert self.itemsOnPage
         self.inv: Sequence = inv
@@ -99,17 +100,20 @@ class Paginator(discord.ui.View):
                     break
 
         if not isinstance(interaction, discord.TextChannel) and edit:  # if it's a interaction or message and it is to be edited
-            msg: discord.Interaction = interaction # for clarity
-            if self.func:
-                self.msg = await msg.edit(embed=self.func(self), view=self, **kwargs)
-            else:
-                self.msg = await msg.edit(view=self, **kwargs)
+            msg: discord.Interaction = interaction  # for clarity
+            try:
+                if self.func:
+                    self.msg = await msg.edit(embed=self.func(self), view=self, **kwargs)
+                else:
+                    self.msg = await msg.edit(view=self, **kwargs)
+            except (discord.errors.InvalidArgument, TypeError): pass
+            else: return
 
-        else:  # if it's an interaction or a text channel, ergo it is sent for the first time
-            if self.func:
-                self.msg = await interaction.send(embed=self.func(self), view=self, **kwargs)
-            else:
-                self.msg = await interaction.send(view=self, **kwargs)
+        # else:  # if it's an interaction or a text channel, ergo it is sent for the first time
+        if self.func:
+            self.msg = await interaction.send(embed=self.func(self), view=self, **kwargs)
+        else:
+            self.msg = await interaction.send(view=self, **kwargs)
 
 
 # Example usage:

@@ -3,9 +3,9 @@ import nextcord as discord
 from nextcord.ext import commands
 
 class BasicCommands(commands.Cog): #cog for basic commands
-    def __init__(self, client, baselogger):
+    def __init__(self, client):
         global logger
-        logger = baselogger.getChild(f"{__name__}Logger")
+        logger = client.logger.getChild(f"{__name__}Logger")
         self.client = client
 
     @discord.slash_command(name="hello")  # type / in chat
@@ -47,5 +47,5 @@ class BasicCommands(commands.Cog): #cog for basic commands
         # try /run ctx.user.avatar.url for example hehe
 
 
-def setup(client, baselogger):
-    client.add_cog(BasicCommands(client, baselogger))
+def setup(client):
+    client.add_cog(BasicCommands(client))

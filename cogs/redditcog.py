@@ -9,10 +9,10 @@ load_dotenv(r"./credentials/reddit.env") #this is where the reddit account passw
 
 
 class RedditCog(commands.Cog):
-    def __init__(self, client, baselogger):
+    def __init__(self, client):
         global logger
         self.client = client
-        logger = baselogger.getChild(f"{__name__}Logger")
+        logger = client.logger.getChild(f"{__name__}Logger")
 
         if os.getenv("REDDIT_CLIENT_ID") == "example":
             logger.warning(
@@ -105,5 +105,5 @@ class RedditCog(commands.Cog):
                 await ctx.send(post.url)
 
 
-def setup(client, baselogger):
-    client.add_cog(RedditCog(client, baselogger))
+def setup(client):
+    client.add_cog(RedditCog(client))

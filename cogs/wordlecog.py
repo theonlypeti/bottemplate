@@ -5,8 +5,8 @@ from nextcord.ext import commands
 
 
 class Wordlecog(commands.Cog):
-    def __init__(self, client, baselogger):
-        logger = baselogger.getChild(f"{__name__}Logger")
+    def __init__(self, client):
+        logger = client.logger.getChild(f"{__name__}Logger")
         self.client = client
         with open("./data/wordlewords.txt", "r") as file:
             self.words = file.readlines()
@@ -88,5 +88,5 @@ class Wordlecog(commands.Cog):
         game.message = await ctx.send("Click on any of the letters to continue guessing.", view=game)
 
 
-def setup(client, baselogger):
-    client.add_cog(Wordlecog(client, baselogger))
+def setup(client):
+    client.add_cog(Wordlecog(client))

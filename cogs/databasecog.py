@@ -6,9 +6,9 @@ from nextcord.ext import commands
 
 
 class DatabaseCog(commands.Cog): #how to load and write files with data in a bot
-    def __init__(self, client, baselogger):
+    def __init__(self, client):
         global logger
-        logger = baselogger.getChild(f"{__name__}Logger")
+        logger = client.logger.getChild(f"{__name__}Logger")
         self.client: discord.Client = client
         os.makedirs(r".\data", exist_ok=True)
         try:
@@ -41,6 +41,6 @@ class DatabaseCog(commands.Cog): #how to load and write files with data in a bot
             json.dump(self.db, file, indent=4)
 
 
-def setup(client, baselogger):
-    client.add_cog(DatabaseCog(client, baselogger))
+def setup(client):
+    client.add_cog(DatabaseCog(client))
 
