@@ -1,6 +1,7 @@
 import nextcord as discord
 from nextcord.ext import commands
 from utils.paginator import Paginator
+from utils.webhook_manager import WebhookManager
 
 TESTSERVER = (860527626100015154,) #Replace with your server id
 #commands in this file will only show up in your server that you specify here
@@ -60,6 +61,11 @@ class Testing(commands.Cog):
                   for i in range(5)]
         pagi = Paginator(func=lambda pagin: embeds[pagin.page], select=None, inv=embeds, itemsOnPage=1)
         await pagi.render(interaction, ephemeral=True)
+
+    @discord.slash_command(name="webhooktest", description="testing", guild_ids=TESTSERVER)
+    async def whtest(self, interaction: discord.Interaction):
+        with WebhookManager(interaction) as wh:  # type: discord.Webhook
+            await wh.send("Hello", username="Test", avatar_url=interaction.user.avatar.url)
 
 
 def setup(client):
