@@ -33,16 +33,16 @@ args = parser.parse_args() #reads the command line arguments
 mylogger.init(args) #initializing the logger
 from utils.mylogger import baselogger #mylogger.baselogger too long
 
-root = os.getcwd()  #current working directory
+root = os.getcwd()  #current working directory  # TODO os.path.dirname(os.path.abspath(__file__)) #the directory of this file??
 
 intents = discord.Intents.default()
 intents.members = True #needed so the bot can see server members
-client = commands.Bot(intents=intents, chunk_guilds_at_startup=True,activity=discord.Game(name="Booting up..."))
+client = commands.Bot(intents=intents, chunk_guilds_at_startup=True, activity=discord.Game(name="Booting up..."))
 client.logger = baselogger
 
 @client.event
 async def on_ready():
-    game = discord.Game(f"{linecount} lines of code; V{VERSION}!")
+    game = discord.Game(f"{client.linecount} lines of code; V{VERSION}!")
     await client.change_presence(status=discord.Status.online, activity=game)
     print(f"Signed in as {client.user.name} at {datetime.now()}")
     baselogger.info(f"{time_module.perf_counter() - start}s Bootup time")
@@ -60,14 +60,14 @@ files = os.listdir(root+r"/utils")
 if not args.no_linecount: #if you don't want to open each file to read the linecount
 
     with open(__file__, "r") as file: #open this file
-        linecount = len(file.readlines())
+        client.linecount = len(file.readlines())
 
     for file in files:
         if file.endswith(".py"):
             with open(root+r"/utils/"+file, "r", encoding="UTF-8") as f:
-                linecount += len(f.readlines())
+                client.linecount += len(f.readlines())
 else:
-    linecount = "Unknown"
+    client.linecount = "Unknown"
 
 allcogs = [cog for cog in os.listdir("./cogs") if cog.endswith("cog.py")] + ["testing.py"]
 cogcount = len(allcogs)
@@ -84,7 +84,7 @@ cogs.remove("testing.py") if args.no_testing else None  # remove testing.py from
 for n, file in enumerate(cogs, start=1): #its in two only because i wouldnt know how many cogs to load and so dont know how to format loading bar
     if not args.no_linecount:
         with open("./cogs/"+file, "r", encoding="UTF-8") as f:
-            linecount += len(f.readlines())
+            client.linecount += len(f.readlines())
     client.load_extension("cogs." + file[:-3])
     if not args.debug:
         sys.stdout.write(f"\rLoading... {(n / len(cogs)) * 100:.02f}% [{(int((n/len(cogs))*10)*'=')+'>':<10}]")

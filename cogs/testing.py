@@ -62,6 +62,6 @@ class Testing(commands.Cog):
         await pagi.render(interaction, ephemeral=True)
 
 
-def setup(client, baselogger):
+def setup(client):
     client.add_cog(Testing(client))
 

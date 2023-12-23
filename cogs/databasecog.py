@@ -4,6 +4,8 @@ from collections import defaultdict
 import nextcord as discord
 from nextcord.ext import commands
 
+#TODO actually use nosql database for this
+
 
 class DatabaseCog(commands.Cog): #how to load and write files with data in a bot
     def __init__(self, client):
