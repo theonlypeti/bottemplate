@@ -26,9 +26,9 @@ class WebhookManager:
             await embedutil.error(self.interaction, "I don't have permissions to create webhooks in this channel")
             raise e
         else:
-            wh = discord.utils.find(lambda wh: wh.name == f"emotehijack{self.channel.id}", whs)
+            wh = discord.utils.find(lambda wh: wh.name == f"mywebhook{self.interaction.client.user.id}", whs)
             if not wh:
-                wh = await self.channel.create_webhook(name=f"emotehijack{self.channel.id}")
+                wh = await self.channel.create_webhook(name=f"mywebhook{self.interaction.client.user.id}")
         await self.interaction.send("done", ephemeral=True)
         return wh
 

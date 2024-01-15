@@ -76,6 +76,10 @@ class Paginator(discord.ui.View):
             for ch in self.children:
                 if ch.custom_id in ("leftbutton", "rightbutton"):
                     ch.disabled = True
+        else:
+            for ch in self.children:
+                if ch.custom_id in ("leftbutton", "rightbutton"):
+                    ch.disabled = False
         if self.select:
             select = list(filter(lambda i: i.custom_id == "pagiselect", self.children))
             if select:
