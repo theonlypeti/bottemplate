@@ -24,19 +24,20 @@ parser.add_argument("--only_testing", action="store_true", help="Add testing mod
 parser.add_argument("--logfile", action="store_true", help="Turns on logging to a text file.")
 parser.add_argument("--no_linecount", action="store_true", help="Disabless opening each file to read the linecount.")
 
-for cog in os.listdir("./cogs"): #adding command line arguments for removing some parts of the bot
+for cog in os.listdir("./cogs"):  # adding command line arguments for removing some parts of the bot
     if cog.endswith("cog.py"):
         parser.add_argument(f"--no_{cog.removesuffix('cog.py')}", action="store_true", help=f"Disable {cog} extension.")
         parser.add_argument(f"--only_{cog.removesuffix('cog.py')}", action="store_true", help=f"Enable only the {cog} extension.")
 
-args = parser.parse_args() #reads the command line arguments
-mylogger.init(args) #initializing the logger
-from utils.mylogger import baselogger #mylogger.baselogger too long
+args = parser.parse_args()  # reads the command line arguments
+mylogger.init(args)  # initializing the logger
+from utils.mylogger import baselogger  # mylogger.baselogger too long
 
-root = os.getcwd()  #current working directory  # TODO os.path.dirname(os.path.abspath(__file__)) #the directory of this file??
+#root = os.getcwd()  # current working directory
+root = os.path.dirname(os.path.abspath(__file__))
 
 intents = discord.Intents.default()
-intents.members = True #needed so the bot can see server members
+intents.members = True  # needed so the bot can see server members
 client = commands.Bot(intents=intents, chunk_guilds_at_startup=True, activity=discord.Game(name="Booting up..."))
 client.logger = baselogger
 
@@ -48,7 +49,7 @@ async def on_ready():
     baselogger.info(f"{time_module.perf_counter() - start}s Bootup time")
 
 @client.event
-async def on_disconnect(): #happens sometimes, ensures on_ready will not display million seconds
+async def on_disconnect():  # happens sometimes, ensures on_ready will not display million seconds
     global start
     start = time_module.perf_counter()
 
@@ -57,9 +58,9 @@ async def on_disconnect(): #happens sometimes, ensures on_ready will not display
 os.chdir(root)
 
 files = os.listdir(root+r"/utils")
-if not args.no_linecount: #if you don't want to open each file to read the linecount
+if not args.no_linecount:  # if you don't want to open each file to read the linecount
 
-    with open(__file__, "r") as file: #open this file
+    with open(__file__, "r") as file:  # open this file
         client.linecount = len(file.readlines())
 
     for file in files:
@@ -81,7 +82,7 @@ if not args.minimal:  # if not minimal
                 cogs.remove(cog)  # remove it from the list of cogs to be loaded
 cogs.remove("testing.py") if args.no_testing else None  # remove testing.py from the list of cogs to be loaded if testing is disabled
 
-for n, file in enumerate(cogs, start=1): #its in two only because i wouldnt know how many cogs to load and so dont know how to format loading bar
+for n, file in enumerate(cogs, start=1):  # its in two loops only because i wouldn't know how many cogs to load and so dont know how to format loading bar
     if not args.no_linecount:
         with open("./cogs/"+file, "r", encoding="UTF-8") as f:
             client.linecount += len(f.readlines())

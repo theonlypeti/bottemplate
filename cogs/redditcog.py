@@ -10,12 +10,11 @@ load_dotenv(r"./credentials/reddit.env") #this is where the reddit account passw
 
 class RedditCog(commands.Cog):
     def __init__(self, client):
-        global logger
         self.client = client
-        logger = client.logger.getChild(f"{__name__}Logger")
+        self.logger = client.logger.getChild(f"{self.__module__}")
 
         if os.getenv("REDDIT_CLIENT_ID") == "example":
-            logger.warning(
+            self.logger.warning(
                 """Reddit login data was not changed in credentials/reddit.env, reddit commands will not be available
                 get your own reddit api token here https://www.reddit.com/prefs/apps
                 or run this bot with the "--no_reddit" command line argument.""")
@@ -44,7 +43,7 @@ class RedditCog(commands.Cog):
                 #        except redditapi.prawcore.exceptions.Forbidden:
                 #            await ctx.channel.send("Forbidden: received 403 HTTP response, what kinda sub are you trying to see?!?")
                 await ctx.send(f"{e}")  # i dont really know how to handle these errors xd
-                logger.error(e)
+                self.logger.error(e)
             else:
                 if not post:
                     await ctx.send("That subreddit does not allow sorting by random, sorry.")

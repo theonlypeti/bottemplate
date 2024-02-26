@@ -1,7 +1,10 @@
 import nextcord as discord
 from nextcord.ext import commands
 from utils.paginator import Paginator
+from utils.Inventory import Inventory
+from utils.permcheck import can_i
 from utils.webhook_manager import WebhookManager
+import string
 
 TESTSERVER = (860527626100015154,) #Replace with your server id
 #commands in this file will only show up in your server that you specify here
@@ -10,7 +13,7 @@ TESTSERVER = (860527626100015154,) #Replace with your server id
 class Testing(commands.Cog):
     def __init__(self, client):
         global logger
-        logger = client.logger.getChild(f"{__name__}Logger")
+        logger = client.logger.getChild(f"{self.__module__}")
         self.client = client
         if TESTSERVER[0] == 957469186798518282: #default check, ignore this if you changed it already
             logger.warning("in cogs/testing.py replace the server id to your server's id for the testing commands to show up, then you can delete this line.")
@@ -57,15 +60,41 @@ class Testing(commands.Cog):
 
     @discord.slash_command(name="pagitest", description="testing", guild_ids=TESTSERVER)
     async def pagitest(self, interaction: discord.Interaction):
-        embeds = [discord.Embed(title=f"Page {i}", description=f"Page {i} of 5", color=discord.Color.random())
-                  for i in range(1, 6)]
+        embeds = [
+            discord.Embed(
+                title=f"Page {i}",
+                description=f"Page {i} of 5",
+                color=discord.Color.random()
+            )
+            for i in range(1, 6)
+        ]
         pagi = Paginator(func=lambda pagin: embeds[pagin.page], select=None, inv=embeds, itemsOnPage=1)
         await pagi.render(interaction, ephemeral=True)
 
-    @discord.slash_command(name="webhooktest", description="testing", guild_ids=TESTSERVER)
+    @discord.slash_command(name="invtest", guild_ids=TESTSERVER, description="Inventory test")
+    async def invtest(self, interaction: discord.Interaction):
+        a = list(string.ascii_uppercase)
+        inv: Inventory = Inventory(a)
+        await inv.render(interaction, ephemeral=True)
+        #inv.inv to take the list of items
+
+    @discord.slash_command(name="webhooktest", description="Send webhook", guild_ids=TESTSERVER)
     async def whtest(self, interaction: discord.Interaction):
         async with WebhookManager(interaction) as wh:  # type: discord.Webhook
             await wh.send("Hello", username="Test", avatar_url=interaction.user.avatar.url)
+
+    @discord.slash_command(name="permissioncheck", description="Permission check", guild_ids=TESTSERVER)
+    async def whtest(self, interaction: discord.Interaction):
+        if can_i(interaction).send_messages:
+            perms = "You can send messages"
+            if can_i(interaction).manage_messages:
+                perms += ", manage messages"
+            if can_i(interaction).manage_emojis:
+                perms += ", manage emojis"
+            if can_i(interaction).manage_channels:
+                perms += ", manage channels"
+            ...
+            await interaction.send(perms)
 
 
 def setup(client):

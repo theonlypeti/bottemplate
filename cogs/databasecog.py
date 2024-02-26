@@ -9,8 +9,7 @@ from nextcord.ext import commands
 
 class DatabaseCog(commands.Cog): #how to load and write files with data in a bot
     def __init__(self, client):
-        global logger
-        logger = client.logger.getChild(f"{__name__}Logger")
+        self.logger = client.logger.getChild(f"{self.__module__}")
         self.client: discord.Client = client
         os.makedirs(r".\data", exist_ok=True)
         try:
@@ -26,7 +25,7 @@ class DatabaseCog(commands.Cog): #how to load and write files with data in a bot
     async def howmany(self, interaction: discord.Interaction):
         self.db[str(interaction.user.id)] += 1  # add one use to the current user in the db
         ldb = sorted(self.db.items(), key=lambda x: x[1])[:5]  # sort the first 5 users with the highest values
-        logger.debug(ldb)  # see for yourself, it is now a list of tuples (id, count)
+        self.logger.debug(ldb)  # see for yourself, it is now a list of tuples (id, count)
         embedVar = discord.Embed(
             title="How many times have people used this command:"
         )
