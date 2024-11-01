@@ -8,6 +8,7 @@ class Template(commands.Cog):
         self.client = client
 
     # add your own commands here
+    # @discord.slash_command()
     # def ecate():
         ...
 

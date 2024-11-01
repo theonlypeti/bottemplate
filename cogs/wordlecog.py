@@ -1,5 +1,4 @@
 import random
-from typing import List, Type
 import nextcord as discord
 from nextcord.ext import commands
 
@@ -20,7 +19,7 @@ class Wordlecog(commands.Cog):
             self.message = None
             self.embed = None
 
-        def verifyGuess(self, guess: str):  # this hurts
+        def verifyGuess(self, guess: str):  # this is so ugly it hurts
             if guess.lower() == self.word:  # if the guess is correct
                 self.embed = discord.Embed(title="Good job!", description=f"You guessed correctly, it was {self.word.upper()}", color=discord.Color.green())
                 for child in self.children:
@@ -32,7 +31,7 @@ class Wordlecog(commands.Cog):
                 for child in self.children:
                     child.disabled = True
 
-            else: # if the guess is wrong and the game is not over
+            else:  # if the guess is wrong and the game is not over
                 # letters: List[Type[Wordlecog.WordleGame.Gomb] | None] = [None] * 5  # typehinting example hehe
                 letters = [None] * 5
                 rightletters = list(self.word)  # this is a list of the letters in the word, for yellow letter checking
@@ -41,7 +40,7 @@ class Wordlecog(commands.Cog):
                     if guessletter == rightletter:  # if the guess is right, in the right place
                         color = discord.ButtonStyle.green
                         rightletters.remove(guessletter)  # remove the letter from the list of right letters
-                        letters[i] = self.Gomb(guessletter.upper(), color, False, self)  # create a button with the letter and color green
+                        letters[i] = self.Letter(guessletter.upper(), color, False, self)  # create a button with the letter and color green
                 locked = False
 
                 for i, guessletter in enumerate(guess):  # if the guess is in the word
@@ -50,14 +49,14 @@ class Wordlecog(commands.Cog):
                         rightletters.remove(guessletter)  # remove the letter from the list of right letters
                     else:
                         color = discord.ButtonStyle.gray  # if the guess is wrong
-                    letters[i] = letters[i] or self.Gomb(guessletter.upper(), color, locked, self)  # if the button is created (green) use that, if not created yet, create it
+                    letters[i] = letters[i] or self.Letter(guessletter.upper(), color, locked, self)  # if the button is created (green) use that, if not created yet, create it
 
                 [self.add_item(i) for i in letters]  # add the buttons to the view
 
         async def render(self):
             await self.message.edit(view=self, embed=self.embed)  # edit the message with the new view
 
-        class Gomb(discord.ui.Button):  # this is a button that has a letter and a color
+        class Letter(discord.ui.Button):  # this is a button that has a letter and a color
             def __init__(self, letter:str, color:discord.ButtonStyle, locked:bool, game):
                 self.game = game
                 super().__init__(style=color, label=letter, disabled=locked)
@@ -80,11 +79,11 @@ class Wordlecog(commands.Cog):
                 await self.game.render()
 
     @discord.slash_command(name="wordle", description="Start a game of wordle. Input a word to start guessing.")
-    async def wordle(self, ctx, guess: str = discord.SlashOption(name="first_guess", required=True)):
-        if len(guess) != 5:
+    async def wordle(self, ctx, first_guess: str):
+        if len(first_guess) != 5:
             await ctx.send("Guess must be a 5 letter word.", delete_after=5)
             return
-        game = Wordlecog.WordleGame(random.choice(self.words).strip(), guess)
+        game = Wordlecog.WordleGame(random.choice(self.words).strip(), first_guess)
         game.message = await ctx.send("Click on any of the letters to continue guessing.", view=game)
 
 

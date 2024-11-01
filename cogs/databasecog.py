@@ -7,14 +7,14 @@ from nextcord.ext import commands
 #TODO actually use nosql database for this
 
 
-class DatabaseCog(commands.Cog): #how to load and write files with data in a bot
+class DatabaseCog(commands.Cog):  # how to simply load and write files with data in a bot
     def __init__(self, client):
         self.logger = client.logger.getChild(f"{self.__module__}")
         self.client: discord.Client = client
         os.makedirs(r".\data", exist_ok=True)
         try:
             with open(r".\data\howmany.json", "r") as file:
-                self.db = defaultdict(int) #olyan mint a dict csak amikor nem talal benne adatot akkor nem errorozik hanem letrehoz benne egy default valuet
+                self.db = defaultdict(int)  # like a dict but does not throw KeyError when a new key is encountered
                 self.db.update(json.load(file, parse_int=int))
         except IOError:
             with open(r".\data\howmany.json", "w") as file:
@@ -29,16 +29,16 @@ class DatabaseCog(commands.Cog): #how to load and write files with data in a bot
         embedVar = discord.Embed(
             title="How many times have people used this command:"
         )
-        for record in ldb:
-            user_id = int(record[0])
-            count = record[1]
+        for user, record in ldb:
+            user_id = int(user)
+            count = record
             embedVar.add_field(
                 name=self.client.get_user(user_id).name,
                 value=count
             )
 
-        await interaction.send(embed=embedVar) #send the msg
-        with open(r".\data\howmany.json", "w") as file: #save the new data
+        await interaction.send(embed=embedVar)  # send the msg
+        with open(r".\data\howmany.json", "w") as file:  # save the new data
             json.dump(self.db, file, indent=4)
 
 

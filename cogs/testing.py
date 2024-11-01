@@ -5,9 +5,7 @@ from utils.Inventory import Inventory
 from utils.permcheck import can_i
 from utils.webhook_manager import WebhookManager
 import string
-
-TESTSERVER = (860527626100015154,) #Replace with your server id
-#commands in this file will only show up in your server that you specify here
+from data.consts import TESTSERVER_ID as TEST
 
 
 class Testing(commands.Cog):
@@ -15,8 +13,11 @@ class Testing(commands.Cog):
         global logger
         logger = client.logger.getChild(f"{self.__module__}")
         self.client = client
-        if TESTSERVER[0] == 957469186798518282: #default check, ignore this if you changed it already
-            logger.warning("in cogs/testing.py replace the server id to your server's id for the testing commands to show up, then you can delete this line.")
+
+        # Replace TESTSERVER_ID with your server id in data/consts.py
+        # commands in this file will only show up in your server that you specify here
+        if TEST[0] == 957469186798518282:  # default check, ignore this if you changed it already
+            logger.warning("in data/consts.py replace the test server id to your server's id for the testing commands to show up in your server.")
 
     class Testvw(discord.ui.View):
         def __init__(self, user: discord.Member):
@@ -49,16 +50,16 @@ class Testing(commands.Cog):
             await interaction.response.defer()
             await interaction.send(f"{interaction.user} says {self.inputtext.value}")
 
-    @discord.slash_command(name="testingvw", description="testing", guild_ids=TESTSERVER)
+    @discord.slash_command(name="testingvw", description="testing", guild_ids=TEST)
     async def testing(self, interaction: discord.Interaction):
         viewObj = self.Testvw(interaction.user)
         viewObj.msg = await interaction.send(content="Hello", view=viewObj, tts=True)
 
-    @discord.slash_command(name="modaltesting", description="testing", guild_ids=TESTSERVER)
+    @discord.slash_command(name="modaltesting", description="testing", guild_ids=TEST)
     async def modaltesting(self, interaction: discord.Interaction):
         await interaction.response.send_modal(self.TextInputModal())
 
-    @discord.slash_command(name="pagitest", description="testing", guild_ids=TESTSERVER)
+    @discord.slash_command(name="pagitest", description="testing", guild_ids=TEST)
     async def pagitest(self, interaction: discord.Interaction):
         embeds = [
             discord.Embed(
@@ -71,19 +72,19 @@ class Testing(commands.Cog):
         pagi = Paginator(func=lambda pagin: embeds[pagin.page], select=None, inv=embeds, itemsOnPage=1)
         await pagi.render(interaction, ephemeral=True)
 
-    @discord.slash_command(name="invtest", guild_ids=TESTSERVER, description="Inventory test")
+    @discord.slash_command(name="invtest", guild_ids=TEST, description="Inventory test")
     async def invtest(self, interaction: discord.Interaction):
         a = list(string.ascii_uppercase)
         inv: Inventory = Inventory(a)
         await inv.render(interaction, ephemeral=True)
         #inv.inv to take the list of items
 
-    @discord.slash_command(name="webhooktest", description="Send webhook", guild_ids=TESTSERVER)
+    @discord.slash_command(name="webhooktest", description="Send webhook", guild_ids=TEST)
     async def whtest(self, interaction: discord.Interaction):
         async with WebhookManager(interaction) as wh:  # type: discord.Webhook
             await wh.send("Hello", username="Test", avatar_url=interaction.user.avatar.url)
 
-    @discord.slash_command(name="permissioncheck", description="Permission check", guild_ids=TESTSERVER)
+    @discord.slash_command(name="permissioncheck", description="Permission check", guild_ids=TEST)
     async def whtest(self, interaction: discord.Interaction):
         if can_i(interaction).send_messages:
             perms = "You can send messages"
